@@ -82,7 +82,7 @@ export function confirmDialog(title, body, okLabel = "OK", cancelLabel = "Cancel
 /** Remove every open sheet / dialog (used on route changes). */
 export function closeOverlays() {
   closeSheet();
-  document.querySelectorAll(".modal-wrap").forEach((m) => m.remove());
+  document.querySelectorAll(".modal-wrap, .confetti").forEach((m) => m.remove());
 }
 
 export const icon = (name) => h("span", { class: "i", "aria-hidden": "true", html: ICONS[name] || "" });

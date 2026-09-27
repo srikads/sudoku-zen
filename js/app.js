@@ -1,12 +1,15 @@
 // App shell: hash router (#home #game #daily #daily/<date> #stats #settings #learn #learn/<id>),
 // bottom tab bar, theme, puzzle-pool loading and service-worker registration.
 //
-// Learn entry point (js/learn.js, written separately):
-//   export function renderLearn(container, { onExit, id }) -> optional cleanup function
+// Learn entry point (js/learn.js, written separately) — loaded lazily:
+//   import("./learn.js").then((m) => m.renderLearn(container, { onExit, techniqueId }))
+//   export function renderLearn(container, { onExit, techniqueId }) -> optional cleanup function
 //   - container: the #view element (full-screen, tab bar hidden)
 //   - onExit(): leave the lesson screen (goes back in history, e.g. to the game or home)
-//   - id: technique/lesson id from the hash (#learn/x_wing) or undefined for the lesson list;
-//     learn.js may also parse location.hash itself.
+//   - techniqueId: technique id from the hash (#learn/x_wing, ids as in techniques.js) or
+//     undefined for the lesson list. (`id` is passed too, as an alias.) learn.js may also
+//     navigate between lessons itself by setting location.hash = "#learn/<id>".
+//   If the module is missing or fails to load, a "Lessons coming soon" message is shown.
 //   Lessons reuse the board renderer: import { createBoard, CELL_ROLE_CLASS, CAND_ROLE_CLASS } from "./board.js".
 
 import { store, save } from "./store.js";
@@ -77,14 +80,17 @@ function route(force = false) {
         .then((m) => {
           if (routed !== token) return;
           view.textContent = "";
-          cleanup = m.renderLearn(view, { onExit: () => goBack("#home"), id: arg || undefined }) || null;
+          const techniqueId = arg ? decodeURIComponent(arg) : undefined;
+          cleanup = m.renderLearn(view, { onExit: () => goBack("#home"), techniqueId, id: techniqueId }) || null;
         })
         .catch((e) => {
-          console.error(e);
+          console.warn("lessons unavailable", e);
           if (routed !== token) return;
           view.textContent = "";
           view.append(h("div", { class: "empty" },
-            h("p", {}, "Lessons are not available yet."),
+            h("div", { class: "empty-ico" }, icon("learn")),
+            h("h2", {}, "Lessons coming soon"),
+            h("p", {}, "Step-by-step technique lessons will appear here in an update."),
             h("button", { class: "btn primary", onclick: () => goBack("#home") }, "Back")));
         });
       break;

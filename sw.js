@@ -10,6 +10,7 @@ const SHELL = [
   "./css/app.css",
   "./js/app.js",
   "./js/board.js",
+  "./js/boot.js",
   "./js/daily.js",
   "./js/fx.js",
   "./js/game.js",
@@ -31,7 +32,13 @@ const SHELL = [
 ];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // cache file by file so one missing optional file can't break the whole install;
+  // anything that failed is cached on first use by the fetch handler below
+  e.waitUntil(
+    caches.open(CACHE)
+      .then((c) => Promise.allSettled(SHELL.map((u) => c.add(new Request(u, { cache: "reload" })))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (e) => {

@@ -1166,8 +1166,12 @@ export function solveLogically(grid) {
  *   unsolvable by solveLogically              -> -1
  *   max tier 1, givens >= 36                  -> 0 Beginner
  *   max tier 1, givens <= 35                  -> 1 Medium
- *   max tier 2 with <= 3 tier-2 steps         -> 1 Medium
- *   max tier 2 with >= 4 tier-2 steps, or 3   -> 2 Hard
+ *   max tier 2, solvable with singles plus ONE round of locked candidates
+ *     (pointing/claiming) at a single sticking point              -> 1 Medium
+ *   max tier 2 needing pairs or several locked-candidate rounds, or max tier 3 -> 2 Hard
+ * The Medium/Hard split uses a canonical closure (singles to fixpoint, then all
+ * locked candidates) instead of raw step counts, so the grade does not depend on
+ * the solve order and is invariant under symmetry transforms.
  *   max tier 4                                -> 3 Expert
  *   max tier 5                                -> 4 Master
  *   max tier 6                                -> 5 Extreme
@@ -1177,19 +1181,44 @@ export function rate(puzzleStr) {
   const givens = g.filter((d) => d).length;
   const res = solveLogically(g);
   const counts = {};
-  let maxTier = 0, tier2 = 0;
+  let maxTier = 0;
   for (const s of res.steps) {
     counts[s.technique] = (counts[s.technique] || 0) + 1;
     if (s.tier > maxTier) maxTier = s.tier;
-    if (s.tier === 2) tier2++;
   }
   let level;
   if (!res.solved) level = -1;
   else if (maxTier <= 1) level = givens >= 36 ? 0 : 1;
-  else if (maxTier === 2) level = tier2 <= 3 ? 1 : 2;
+  else if (maxTier === 2) level = lockedCandidateRounds(g) === 1 ? 1 : 2;
   else if (maxTier === 3) level = 2;
   else level = maxTier - 1; // 4 -> 3, 5 -> 4, 6 -> 5
   return { level, maxTier, counts, givens, solved: res.solved };
+}
+
+/**
+ * Number of times the solver gets stuck on singles and needs locked candidates
+ * (all of them, applied to closure) to go on; -1 if singles + locked candidates
+ * cannot solve the puzzle.
+ */
+function lockedCandidateRounds(grid) {
+  const g = grid.slice(), c = computeCandidates(g);
+  const singles = [fullHouse, nakedSingle, hiddenSingle], locked = [pointing, claiming];
+  const run = (techs) => {
+    let any = false;
+    for (;;) {
+      const st = makeState(g, c);
+      let s = null;
+      for (const t of techs) if ((s = t(st))) break;
+      if (!s) return any;
+      applyStep(g, c, s);
+      any = true;
+    }
+  };
+  for (let rounds = 0; ; rounds++) {
+    run(singles);
+    if (g.every((d) => d)) return rounds;
+    if (!run(locked)) return -1;
+  }
 }
 
 /**

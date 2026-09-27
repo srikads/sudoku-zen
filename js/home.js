@@ -9,7 +9,7 @@ import { fmtTime } from "./rules.js";
 export function renderHome(view) {
   const g = store.saved && !store.saved.won ? store.saved : null;
   const streak = dailyStreak(store.daily, localISO());
-  view.append(
+  view.append(...[
     h("header", { class: "home-head" },
       h("div", { class: "logo", html: LOGO }),
       h("h1", { class: "home-title" }, "Sudoku Zen"),
@@ -27,7 +27,9 @@ export function renderHome(view) {
         icon("calendar"), h("span", {}, "Daily Challenge"),
         streak ? h("span", { class: "chip-fire", title: "Daily streak" }, icon("fire"), String(streak)) : null),
       h("button", { class: "btn secondary big", id: "btn-learn", onclick: () => navigate("#learn") },
-        icon("learn"), "Learn Techniques")));
+        icon("learn"), "Learn Techniques")),
+    h("p", { class: "home-foot" }, "Works offline · Nothing leaves your phone"),
+  ].filter(Boolean));
 }
 
 /** Bottom sheet with the six levels; resolves with the chosen index or null. */

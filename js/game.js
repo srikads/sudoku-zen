@@ -39,8 +39,9 @@ export async function startNewGame(level) {
     toast("Puzzles could not be loaded");
     return;
   }
+  // an abandoned (or lost) regular game counts as a loss — it was counted as started
   const old = store.saved;
-  if (old && old.over && !old.won) recordLoss(old);
+  if (old && !old.won) recordLoss(old);
   const { puzzle, solution } = randomPuzzle(level);
   setSavedGame(createGame({ puzzle, solution, level }), null);
   noteStarted(level);
@@ -101,7 +102,7 @@ export function renderGame(view, { daily = null } = {}) {
       return b;
     };
 
-    E.time = h("span", { class: "g-time" });
+    E.time = h("b", { class: "g-time" });
     E.pauseBtn = h("button", { class: "icon-btn", "aria-label": "Pause", onclick: () => setPaused(!S.paused) }, icon("pause"));
     E.mistakes = h("b", {});
     E.score = h("b", {});
@@ -143,7 +144,7 @@ export function renderGame(view, { daily = null } = {}) {
         return b;
       }));
     E.banner = h("div", { class: "hint-banner", role: "region", "aria-live": "polite" });
-    root.append(controls, E.numpad, E.banner);
+    root.append(h("div", { class: "g-bottom" }, controls, E.numpad, E.banner));
 
     // restore a hint that was open when the player left (e.g. to read the lesson)
     if (g.activeHint?.step) {
@@ -344,16 +345,20 @@ export function renderGame(view, { daily = null } = {}) {
   }
 
   /**
-   * Notes shown while a hint is open: the player's notes, plus the engine's candidates
-   * for cells the hint talks about when the player has no notes there.
+   * Notes shown while a hint is open: the player's notes, except that every cell the hint
+   * talks about shows the engine's candidates (see hintNotes), so the explanation matches.
    * `base` = full engine view of candidates, used when applying eliminations.
    */
   function hintDisplay(g, step) {
     const base = hintNotes(g);
     const notes = g.notes.slice();
     const hl = step.highlight || {};
-    const cells = new Set([...(hl.cands || []).map((c) => c.cell), ...(step.eliminations || []).map((e) => e.cell)]);
-    for (const i of cells) if (!notes[i] && !g.grid[i]) notes[i] = base[i];
+    const cells = new Set([
+      ...(hl.cands || []).map((c) => c.cell), ...(hl.cells || []).map((c) => c.cell),
+      ...(step.eliminations || []).map((e) => e.cell), ...(step.placements || []).map((p) => p.cell),
+    ]);
+    // show what the engine reasons with (player notes cleaned of impossible digits)
+    for (const i of cells) if (!g.grid[i]) notes[i] = base[i];
     return { notes, base };
   }
 
@@ -366,13 +371,14 @@ export function renderGame(view, { daily = null } = {}) {
       h("div", { class: "hint-head" },
         h("span", { class: "hint-ico" }, icon("hint")),
         h("span", { class: "hint-name" }, step.name || "Hint"),
-        kind === "step" ? h("span", { class: "hint-left" }, `${hintsLeft(S.g)} left`) : null),
+        kind === "step" ? h("span", { class: "hint-left" }, `${hintsLeft(S.g)} left`) : null,
+        h("button", { class: "icon-btn hint-x", id: "hint-close", "aria-label": "Close hint", onclick: () => closeHint() }, icon("close"))),
       h("p", { class: "hint-text" }, step.text || ""),
       h("div", { class: "hint-buttons" },
         nothingToApply ? null : h("button", { class: "btn primary", id: "hint-apply", onclick: applyHint },
           kind === "mistake" ? "Erase" : "Apply"),
         canLearn ? h("button", { class: "btn secondary", id: "hint-learn", onclick: learnHint }, "Learn this technique") : null,
-        h("button", { class: "btn ghost", id: "hint-close", onclick: () => closeHint() }, "Close")));
+        nothingToApply && !canLearn ? h("button", { class: "btn secondary", onclick: () => closeHint() }, "OK") : null));
   }
 
   function closeHint(doRender = true) {
@@ -472,7 +478,7 @@ export function renderGame(view, { daily = null } = {}) {
       row("Time", fmtTime(rec.time), bests.includes("time") ? badge("New best") : null),
       row("Score", String(rec.score), bests.includes("score") ? badge("New best") : null),
       bonus ? h("div", { class: "win-note" }, `includes +${bonus} time bonus`) : null,
-      rec.perfect ? h("div", { class: "win-perfect" }, "Perfect game — no mistakes, no hints") : null);
+      rec.perfect ? h("div", { class: "win-perfect" }, "Perfect game · no mistakes, no hints") : null);
     dialog({
       icon: icon("trophy"),
       title: daily ? "Daily challenge solved!" : "Excellent!",

@@ -11,9 +11,9 @@
 //
 // Level acceptance (see rate() in js/techniques.js for the grading itself):
 //   Beginner  tier-1 puzzles with clues added back from the solution to 36-40 givens
-//   Medium    tier-1 puzzles topped up to 28-32 givens, or tier 2 with few tier-2 steps
+//   Medium    tier-1 puzzles topped up to 28-32 givens, or graded Medium (one locked-candidates round)
 //   Hard/Expert/Master  as graded
-//   All levels: the grade must be the same for two random symmetry transforms of the puzzle.
+//   All levels: the grade must be the same for three random symmetry transforms of the puzzle.
 //   Extreme   graded tier 6 AND at least two tier-6 steps (so it is clearly harder than Master)
 
 import { readFileSync, writeFileSync, renameSync, existsSync } from 'node:fs';
@@ -91,7 +91,7 @@ let lastSave = start, generated = 0, added = 0;
 function accept(level, puzzle) {
   if (level < 0 || levels[level].length >= TARGETS[level] || seen.has(puzzle)) return false;
   // grading must be stable under symmetry transforms (the app always transforms)
-  for (let k = 0; k < 2; k++) if (rate(transform(puzzle, rand)).level !== level) return false;
+  for (let k = 0; k < 3; k++) if (rate(transform(puzzle, rand)).level !== level) return false;
   seen.add(puzzle); levels[level].push(puzzle); added++;
   return true;
 }

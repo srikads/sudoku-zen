@@ -113,6 +113,10 @@ body.fullscreen .view { padding-bottom: calc(var(--safe-b) + 12px); }
 
 .loading, .empty { padding: 48px 16px; text-align: center; color: var(--muted); }
 .empty .btn { margin-top: 12px; }
+.empty h2 { color: var(--ink); margin: 12px 0 6px; font-size: 1.3rem; }
+.empty p { margin: 0 auto; max-width: 320px; }
+.empty-ico { display: inline-flex; color: var(--accent); background: var(--accent-soft); border-radius: 50%; padding: 18px; }
+.empty-ico .i svg { width: 36px; height: 36px; }
 
 /* ---------------------------------------------------------------- tab bar */
 #tabbar {
@@ -170,6 +174,7 @@ body.fullscreen .view { padding-bottom: calc(var(--safe-b) + 12px); }
   display: inline-flex; align-items: center; justify-content: center;
 }
 .home-actions { display: grid; gap: 12px; margin-top: 16px; }
+.home-foot { text-align: center; color: var(--muted); font-size: .82rem; margin: 28px 0 0; }
 .chip-fire {
   display: inline-flex; align-items: center; gap: 2px; margin-left: 4px;
   background: var(--card); color: var(--gold); border-radius: 999px; padding: 2px 8px 2px 4px; font-size: .85rem;
@@ -232,8 +237,8 @@ body.fullscreen .view { padding-bottom: calc(var(--safe-b) + 12px); }
 }
 .win-row span { color: var(--muted); }
 .win-row b { display: inline-flex; align-items: center; gap: 8px; font-size: 1.1rem; }
-.new-best {
-  background: var(--gold); color: #fff; font-size: .7rem; font-weight: 700; text-transform: uppercase;
+.win-row .new-best, .new-best {
+  background: var(--gold); color: #1a1300; font-size: .7rem; font-weight: 700; text-transform: uppercase;
   letter-spacing: .04em; border-radius: 999px; padding: 2px 8px;
 }
 .win-note { color: var(--muted); font-size: .82rem; text-align: right; padding-top: 4px; }
@@ -248,7 +253,12 @@ body.fullscreen .view { padding-bottom: calc(var(--safe-b) + 12px); }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 /* ---------------------------------------------------------------- game screen */
-.game { display: flex; flex-direction: column; align-items: stretch; }
+.game {
+  display: flex; flex-direction: column; align-items: stretch;
+  min-height: calc(100dvh - var(--safe-t) - var(--safe-b) - 20px);
+}
+/* controls + pad (or the hint banner) share the space below the board, centred in it */
+.g-bottom { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; padding-bottom: 4px; }
 .g-top { display: flex; align-items: center; gap: 4px; min-height: 48px; }
 .g-title {
   flex: 1; text-align: center; font-weight: 750; font-size: 1.1rem;
@@ -317,6 +327,7 @@ body.fullscreen .view { padding-bottom: calc(var(--safe-b) + 12px); }
 .cell.role-fin { background: var(--r-fin); }
 .cell.role-target { background: var(--r-target); }
 .board .cell.sel[class*="role-"], .board .cell.sel.unit { box-shadow: inset 0 0 0 2px var(--accent); }
+.notes span[class*="cand-"] { font-size: 2.9cqw; margin: 0; }
 .notes span.cand-key { background: var(--c-key); color: var(--c-ink); font-weight: 700; }
 .notes span.cand-place { background: var(--c-place); color: var(--c-ink); font-weight: 700; }
 .notes span.cand-a { background: var(--c-a); color: var(--c-ink); font-weight: 700; }
@@ -420,6 +431,7 @@ body.fullscreen .view { padding-bottom: calc(var(--safe-b) + 12px); }
 .hint-head { display: flex; align-items: center; gap: 8px; }
 .hint-ico { color: var(--gold); display: inline-flex; }
 .hint-name { font-weight: 750; font-size: 1.08rem; flex: 1; }
+.hint-x { margin: -8px -10px -8px 0; color: var(--muted); }
 .hint-left { font-size: .78rem; color: var(--muted); font-weight: 600; }
 .hint-text { margin: 6px 0 12px; font-size: .96rem; }
 .hint-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -503,7 +515,7 @@ body.fullscreen .view { padding-bottom: calc(var(--safe-b) + 12px); }
   border-radius: 999px; padding: 8px 14px; font-size: .92rem;
 }
 .daily-streak { color: var(--gold); }
-.daily-streak span { color: var(--muted); }
+.daily-streak > span:not(.i) { color: var(--muted); }
 .daily-count { color: var(--muted); }
 .daily-count.full { color: var(--gold); font-weight: 700; }
 .cal { padding: 8px 10px 12px; }
@@ -547,6 +559,12 @@ body.fullscreen .view { padding-bottom: calc(var(--safe-b) + 12px); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+/* tall phones: bigger number pad */
+@media (min-height: 780px) {
+  .num { min-height: 80px; }
+  .num-d { font-size: 2.4rem; }
 }
 
 /* wider screens: a little more breathing room */
