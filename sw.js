@@ -1,6 +1,6 @@
 // Service worker: precache the whole app for full offline use, serve cache-first.
 // Bump VERSION whenever any app file changes so installed apps pick up the update.
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE = "sudoku-zen-" + VERSION;
 
 const SHELL = [
@@ -8,6 +8,7 @@ const SHELL = [
   "./index.html",
   "./manifest.webmanifest",
   "./css/app.css",
+  "./css/learn.css",
   "./js/app.js",
   "./js/board.js",
   "./js/boot.js",
