@@ -1,0 +1,9 @@
+{
+  "name": "sudoku-zen",
+  "private": true,
+  "type": "module",
+  "description": "No build step — this file only exists so `npm test` runs the Node unit tests.",
+  "scripts": {
+    "test": "node --test \"tests/*.test.mjs\""
+  }
+}
