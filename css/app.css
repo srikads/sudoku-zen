@@ -245,8 +245,8 @@ body.fullscreen .view { padding-bottom: calc(var(--safe-b) + 12px); }
 .win-perfect { margin-top: 10px; text-align: center; color: var(--good); font-weight: 650; }
 
 .toast {
-  position: fixed; left: 50%; bottom: calc(96px + var(--safe-b)); z-index: 60;
-  transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  position: fixed; left: 50%; top: calc(var(--safe-t) + 14px); z-index: 60;
+  transform: translate(-50%, -20px); opacity: 0; pointer-events: none;
   background: var(--ink); color: var(--bg); padding: 10px 18px; border-radius: 999px;
   font-size: .92rem; font-weight: 600; transition: opacity .2s, transform .2s; max-width: calc(100vw - 32px);
 }
@@ -258,7 +258,8 @@ body.fullscreen .view { padding-bottom: calc(var(--safe-b) + 12px); }
   min-height: calc(100dvh - var(--safe-t) - var(--safe-b) - 20px);
 }
 /* controls + pad (or the hint banner) share the space below the board, centred in it */
-.g-bottom { flex: 1; display: flex; flex-direction: column; justify-content: space-evenly; padding-bottom: 4px; }
+.g-bottom { display: flex; flex-direction: column; padding-top: clamp(0px, 1.5dvh, 16px); }
+.g-bottom .numpad { margin-top: clamp(4px, 2.5dvh, 28px); }
 .g-top { display: flex; align-items: center; gap: 4px; min-height: 48px; }
 .g-title {
   flex: 1; text-align: center; font-weight: 750; font-size: 1.1rem;

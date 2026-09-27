@@ -20,6 +20,7 @@ import { pickLevel } from "./home.js";
 
 export const LEVEL_NAMES = ["Beginner", "Medium", "Hard", "Expert", "Master", "Extreme"];
 const AUTO_NOTES_MIN_LEVEL = 3;   // Expert+
+const lessonIds = new Set(TECHNIQUES.map((t) => t.id));   // techniques that have a lesson
 
 export function fmtDay(iso, opts = { month: "short", day: "numeric" }) {
   const [y, m, d] = iso.split("-").map(Number);
@@ -303,8 +304,6 @@ export function renderGame(view, { daily = null } = {}) {
   }
 
   // ---------------------------------------------------------------- hints
-  const lessonIds = new Set(TECHNIQUES.map((t) => t.id));
-
   function doHint() {
     if (blocked()) return;
     if (S.hint) { closeHint(); return; }
@@ -411,7 +410,7 @@ export function renderGame(view, { daily = null } = {}) {
 
   // ---------------------------------------------------------------- keyboard
   function onKey(e) {
-    if (!S.g || document.querySelector(".modal-wrap, .sheet")) return;
+    if (!S.g || document.querySelector(".modal-wrap.show, .sheet.show")) return;
     const k = e.key;
     if ((e.ctrlKey || e.metaKey) && (k === "z" || k === "Z")) { e.preventDefault(); doUndo(); return; }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
